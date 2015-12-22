@@ -259,7 +259,7 @@ expr
             }
         }
 
-        / kind:("get_local" / "get_global") __ id:var {
+        / kind:"get_local" __ id:var {
             return {
                 kind: kind,
                 id: id
@@ -464,13 +464,6 @@ type_def = kind:"type" name:( __ "$" name )? __ func_def {
     };
 }
 
-global = kind:"global" body:( ( __ local_type )* / __ name __ local_type ) {
-    return {
-        kind: kind,
-        body: body
-    };
-}
-
 import = kind:"import" id:( __ "$" name )? __ ["] name1:name ["] __ ["] name2:name ["] type:( __ func_type )? params:( __ param )* result:( __ result )? {
     return {
         kind: kind,
@@ -483,9 +476,10 @@ import = kind:"import" id:( __ "$" name )? __ ["] name1:name ["] __ ["] name2:na
     };
 }
 
-export = kind:"export" __ ["] name:( "\\" "\"" / !["] . )* ["] __ var {
+export = kind:"export" __ ["] name:( "\\" "\"" / !["] . )* ["] __ id:var {
     return {
         kind: kind,
+        id:id,
         name: name.map(function (e) {
             return e[1];
         }).join('')
@@ -518,7 +512,7 @@ invoke = "(" kind:"invoke" __ ["] name:( "\\\"" / !["] . )* ["] body:( __ expr )
     };
 }
 
-module = kind:"module" body:( __ "(" ( func / global / import / export / table / memory / type_def ) __ ")" )* {
+module = kind:"module" body:( __ "(" ( func / import / export / table / memory / type_def ) __ ")" )* {
     var result = [];
     return {
         kind: kind,
